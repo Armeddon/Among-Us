@@ -126,7 +126,7 @@ impl AmongUs {
                 }
             }
             Command::Who => {
-
+                todo!();
             }
             Command::Where => {
                 if let Some(value) = self.stack.last() {
@@ -146,15 +146,18 @@ macro_rules! interpret {
             let mut v:Vec<&str> = Vec::new();
             let mut save_cmds = false;
             $(
-                let mut ln = &$line;
+                let mut ln = stringify!($line);
                 if save_cmds{
-                    v.push(&$line);
+                    v.push(ln);
                 }
-                do {
-                    if !save_cmds && let Some(lst) = v.last() {
-                        ln = &lst;
+
+                loop {
+                    if let Some(lst) = v.last() {
+                        if !save_cmds {
+                            ln = *lst;
+                        }
                     }
-                    match stringify!(*ln) {
+                    match ln {
                         "SUS;" => {
                             let cmd = Command::Sus(clr);
                             $amongus.exec(cmd);
@@ -222,8 +225,14 @@ macro_rules! interpret {
                         }
                         _ => {}
                     }
+                    if save_cmds {
+                        break;
+                    }
+                    let Some(_) = v.last()
+                    else {
+                        break;
+                    };
                 }
-                while let Some(_) = v.last() && !save_cmds;
             )* 
         }
     }
